@@ -1,5 +1,6 @@
 package public_api.instargram_gide_book.service;
 
+import org.apache.catalina.User;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -9,9 +10,18 @@ import public_api.instargram_gide_book.dto.CustomOAuth2User;
 import public_api.instargram_gide_book.dto.LineResponse;
 import public_api.instargram_gide_book.dto.OAuth2Response;
 import public_api.instargram_gide_book.dto.UserDTO;
+import public_api.instargram_gide_book.entity.UserEntity;
+import public_api.instargram_gide_book.repository.UserRepository;
 
 @Service
 public class CustomOauth2UserService extends DefaultOAuth2UserService {
+
+    private final UserRepository userRepository;
+
+    public CustomOauth2UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -30,12 +40,34 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         }
 
     String username = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+    UserEntity existData = userRepository.findByUsername(username);
+
+    if (existData==null) {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setUsername(username);
+        userEntity.setName(oAuth2Response.getName());
+        userEntity.setRole("ROLE_USER");
+
+        userRepository.save(userEntity);
 
         UserDTO userDTO = new UserDTO();
-        userDTO.setName(oAuth2Response.getName());
         userDTO.setUsername(username);
-        userDTO.setRole("ROLE");
+        userDTO.setName(oAuth2Response.getName());
+        userDTO.setRole("ROLE_USER");
 
-    return new CustomOAuth2User(userDTO);
+        return new CustomOAuth2User(userDTO);
+    } else {
+        existData.setName(oAuth2Response.getName());
+
+        userRepository.save(existData);
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername(existData.getUsername());
+        userDTO.setName(oAuth2Response.getName());
+        userDTO.setRole(existData.getRole());
+
+        return new CustomOAuth2User(userDTO);
+
+    }
     }
 }
