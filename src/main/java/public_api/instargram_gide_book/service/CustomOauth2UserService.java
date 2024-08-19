@@ -5,8 +5,10 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import public_api.instargram_gide_book.dto.CustomOAuth2User;
 import public_api.instargram_gide_book.dto.LineResponse;
 import public_api.instargram_gide_book.dto.OAuth2Response;
+import public_api.instargram_gide_book.dto.UserDTO;
 
 @Service
 public class CustomOauth2UserService extends DefaultOAuth2UserService {
@@ -27,6 +29,13 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             return null;
         }
 
-        return null;
+    String username = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setName(oAuth2Response.getName());
+        userDTO.setUsername(username);
+        userDTO.setRole("ROLE");
+
+    return new CustomOAuth2User(userDTO);
     }
 }

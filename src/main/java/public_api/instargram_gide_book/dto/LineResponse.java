@@ -9,7 +9,7 @@ public class LineResponse implements OAuth2Response{
 
     public LineResponse(Map<String, Object> attribute) {
 
-        this.attribute = (Map<String, Object>) attribute.get("response");
+        this.attribute = attribute;
     }
 
     @Override
@@ -24,6 +24,6 @@ public class LineResponse implements OAuth2Response{
 
     @Override
     public String getName() {
-        return "";
+        return attribute.get("displayName").toString();
     }
 }
